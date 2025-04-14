@@ -68,6 +68,7 @@ module.exports = {
         },
       },
       fontFamily: {
+        urbanistLight: ['Urbanist_Light'],
         urbanist: ['UrbanistRegular'],
         urbanistBold: ['UrbanistBold'],
         UrbanistMedium: ['UrbanistMedium'],

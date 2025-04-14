@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const index = () => {
+const Community = () => {
   return (
     <View>
-      <Text>index</Text>
+      <Text>Community</Text>
     </View>
   );
 };
 
-export default index;
+export default Community;

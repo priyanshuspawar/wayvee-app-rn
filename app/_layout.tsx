@@ -5,6 +5,7 @@ import {
   Urbanist_700Bold,
   Urbanist_500Medium,
   Urbanist_600SemiBold,
+  Urbanist_300Light,
 } from '@expo-google-fonts/urbanist';
 import { Stack, SplashScreen } from 'expo-router';
 import { useEffect, useRef } from 'react';
@@ -17,6 +18,7 @@ import QueryProvider from '~/providers/query-provider';
 import { AuthContext } from '~/store/auth';
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    Urbanist_Light: Urbanist_300Light,
     UrbanistRegular: Urbanist_400Regular,
     UrbanistBold: Urbanist_700Bold,
     UrbanistMedium: Urbanist_500Medium,

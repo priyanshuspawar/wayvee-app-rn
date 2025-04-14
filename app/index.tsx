@@ -11,8 +11,8 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
   if (user?.id) {
-    return <Redirect href="/(root)" />;
+    return <Redirect href="/(tabs)" />;
   }
 
-  return <Redirect href="/(auth)/register" />;
+  return <Redirect href="/(tabs)" />;
 }
