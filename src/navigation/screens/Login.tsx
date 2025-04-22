@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { useRouter } from 'expo-router';
 import { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { View, Text, Pressable } from 'react-native';
@@ -18,7 +17,6 @@ import { AuthContext } from '~/store/auth';
 const Login = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const { registerUser } = useStore(useContext(AuthContext)!, (s) => s);
-  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -67,7 +65,7 @@ const Login = () => {
             </Text>
             <Pressable
               onPress={() => {
-                router.navigate('/(auth)/register');
+                // router.navigate('/(auth)/register');
               }}>
               <Text className="text-blue-500 underline">create one</Text>
             </Pressable>

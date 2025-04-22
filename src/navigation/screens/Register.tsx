@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import dayjs from 'dayjs';
-import { useRouter } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { View, Text, Pressable } from 'react-native';
 import z from 'zod';
@@ -25,7 +24,6 @@ const Register = () => {
   } = useForm({
     resolver: zodResolver(schema),
   });
-  const router = useRouter();
   const submit = (e: any) => {
     console.log(e);
   };
@@ -33,7 +31,7 @@ const Register = () => {
     <Container className="p-4">
       <Pressable
         onPress={() => {
-          router.back();
+          //   router.back();
         }}
         className="flex flex-row justify-between py-2">
         <Text className="font-urbanist text-primary-normal">back</Text>

@@ -1,12 +1,19 @@
 import { Shadow, RoundedRect, Canvas } from '@shopify/react-native-skia';
-import { View, Dimensions, Text } from 'react-native';
+import { Pressable, Dimensions, Text } from 'react-native';
 // import { Neomorph } from 'react-native-neomorph-shadows';
-const PillButton = ({ title }: { title: string }) => {
+const PillButton = ({
+  title,
+  onPress,
+}: {
+  title: string;
+  onPress?: () => void;
+}) => {
   const { height, width } = Dimensions.get('window');
   const newW = width * 0.45;
   const newH = height * 0.065;
   return (
-    <View
+    <Pressable
+      onPress={onPress}
       className="relative flex items-center justify-center"
       style={{
         width: newW,
@@ -26,7 +33,7 @@ const PillButton = ({ title }: { title: string }) => {
       <Text className="absolute font-UrbanistSemiBold text-lg text-muted-2">
         {title}
       </Text>
-    </View>
+    </Pressable>
   );
 };
 

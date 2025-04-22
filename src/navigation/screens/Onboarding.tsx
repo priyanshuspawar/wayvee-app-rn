@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   BlurMask,
   Canvas,
@@ -18,8 +20,11 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 // import { Container } from '~/components/Container';
+import type { RootStackParamList } from '../types';
+
 import PillButton from '~/components/ui/PillButton';
 
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
 const Onboard = () => {
   const height = Dimensions.get('window').height * 0.3;
   const width = Dimensions.get('window').width * 1.2;
@@ -32,11 +37,11 @@ const Onboard = () => {
       console.log('swipe left');
     }
   });
-
+  const navigation = useNavigation<NavProp>();
   return (
     <GestureDetector gesture={pan}>
       <View
-        className="flex h-full w-full justify-end"
+        className="h-full w-full flex-1 justify-end"
         // source={require('assets/background-1.jpg')
         // }
         style={{
@@ -84,8 +89,18 @@ const Onboard = () => {
                 ))}
               </View>
               <View className="flex w-full flex-row justify-between">
-                <PillButton title="Log in" />
-                <PillButton title="Sign up" />
+                <PillButton
+                  onPress={() => {
+                    navigation.navigate('Login');
+                  }}
+                  title="Log in"
+                />
+                <PillButton
+                  onPress={() => {
+                    navigation.navigate('Register');
+                  }}
+                  title="Sign up"
+                />
               </View>
             </SafeAreaView>
           </SafeAreaProvider>
