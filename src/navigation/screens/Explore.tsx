@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Canvas, LinearGradient, Rect, vec } from '@shopify/react-native-skia';
 // import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -10,14 +12,17 @@ import {
 import { View, Text, Image, TextInput, SafeAreaView } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
+import { RootStackParamList } from '../types';
+
 import StayCard from '~/components/StayCard';
 // import { SafeAreaView } from 'react-native-safe-area-context';
 import { dataStays } from '~/utils/constants';
 import { vh, vw } from '~/utils/dimensions';
 
 // import { Container } from '~/components/Container';
-
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
 const Explore = () => {
+  const navigation = useNavigation<NavProp>();
   return (
     <SafeAreaView className="flex-1 bg-neutral-n40">
       <FlatList
@@ -39,6 +44,7 @@ const Explore = () => {
             title={item.title}
             onPress={() => {
               console.log('pressed');
+              navigation.navigate('Stay', { stayId: 'dsd' });
               // router.push('/stays/[id]');
             }}
           />

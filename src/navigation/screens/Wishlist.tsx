@@ -1,12 +1,11 @@
-import React from 'react';
 import { View, Text } from 'react-native';
 
-const Tab = () => {
+const Wishlist = () => {
   return (
     <View>
-      <Text>Tab</Text>
+      <Text>Wishlist</Text>
     </View>
   );
 };
 
-export default Tab;
+export default Wishlist;

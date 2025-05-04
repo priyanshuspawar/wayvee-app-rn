@@ -17,7 +17,7 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading) {
     return (
-      <Container className="items-center justify-center">
+      <Container className="h-screen w-screen flex-col items-center justify-center">
         <ActivityIndicator size="large" />
       </Container>
     );

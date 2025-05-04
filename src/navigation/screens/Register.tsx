@@ -17,11 +17,7 @@ const Register = () => {
     }),
     phoneNumber: z.string(),
   });
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { control, handleSubmit } = useForm({
     resolver: zodResolver(schema),
   });
   const submit = (e: any) => {

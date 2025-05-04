@@ -7,6 +7,7 @@ type ButtonProps = {
   icon?: React.ReactNode;
   variant?: 'primary' | 'outlined';
   className?: string;
+  disabled?: boolean;
 };
 
 const Button = ({
@@ -15,12 +16,14 @@ const Button = ({
   icon: Icon,
   variant = 'primary',
   className = '',
+  disabled = false,
 }: ButtonProps) => {
   const isOutlined = variant === 'outlined';
 
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       className={`
         flex-row items-center justify-center rounded-xl px-4 py-3
         ${

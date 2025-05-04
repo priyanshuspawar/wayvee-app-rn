@@ -16,7 +16,7 @@ export const Container = ({
     <SafeAreaProvider>
       <SafeAreaView
         className={twMerge(
-          'relative flex w-screen flex-1 bg-neutral-n40',
+          'relative flex min-h-screen w-screen flex-1 bg-neutral-n40',
           className
         )}>
         <StatusBar hidden />

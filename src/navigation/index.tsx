@@ -10,6 +10,7 @@ import RegisterScreen from '../navigation/screens/Register';
 import StayScreen from '../navigation/screens/StayDetails';
 import HomeTabs from '../navigation/screens/Tabs'; // Your Tab Navigator
 import type { RootStackParamList } from '../navigation/types';
+import CreateStayScreen from './screens/CreateStay';
 
 import { AuthContext } from '~/store/auth';
 
@@ -21,21 +22,25 @@ export function Navigation() {
 
   return (
     <NavigationContainer>
-      {user?.id ? (
-        // Authenticated Navigator
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="CreateStay" component={CreateStayScreen} />
+        <Stack.Screen name="Home" component={HomeTabs} />
+        <Stack.Screen name="Stay" component={StayScreen} />
+
+        {/* <Stack.Screen name="Home" component={HomeT} /> */}
+      </Stack.Navigator>
+      {/* {user?.id ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home" component={HomeTabs} />
           <Stack.Screen name="Stay" component={StayScreen} />
-          {/* More private screens here */}
         </Stack.Navigator>
       ) : (
-        // Unauthenticated Navigator
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Onboard" component={OnboardScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
         </Stack.Navigator>
-      )}
+      )} */}
     </NavigationContainer>
   );
 }

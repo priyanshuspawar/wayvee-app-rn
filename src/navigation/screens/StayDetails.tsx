@@ -1,6 +1,8 @@
+import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import {
   ArrowLeft,
+  BedDouble,
   Heart,
   Share,
   Star,
@@ -17,6 +19,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import AmenityIcon from '~/components/AmenitiesIcon';
+import { amenityKeys } from '~/utils/constants';
 const { width, height } = Dimensions.get('window');
 
 const data = {
@@ -114,7 +119,7 @@ const StaysScreen = () => {
   const isNew = targetDate.isAfter(dayjs().subtract(1, 'month'));
   const heightOfCarousel = height * 0.33;
   const bottomCTAHeight = height * 0.08;
-  const heightOfDetailsOverlay = height - heightOfCarousel - bottomCTAHeight;
+  const navigation = useNavigation();
 
   const scrollY = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
@@ -156,6 +161,7 @@ const StaysScreen = () => {
         <Pressable
           onPress={() => {
             // router.back();
+            navigation.goBack();
           }}
           className="h-fit rounded-full bg-muted-2 p-2">
           <ArrowLeft color="#262626" size={18} />
@@ -174,11 +180,13 @@ const StaysScreen = () => {
       <Animated.ScrollView
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
         className="relative flex-1 bg-neutral-n20">
-        <View>
+        {/* carousel */}
+        <View className="absolute top-0 z-10">
           <Carousel
             width={width}
-            height={height * 0.33}
+            height={height * 0.35}
             loop
             autoPlay={false}
             data={data.displayImages}
@@ -212,11 +220,8 @@ const StaysScreen = () => {
           </View>
         </View>
         <View
-          style={{
-            top: height * 0.32 - 10,
-            height: heightOfDetailsOverlay,
-          }}
-          className="absolute w-full flex-grow items-center gap-2 overflow-hidden rounded-3xl bg-neutral-n20 p-4">
+          style={{ zIndex: 10, marginTop: height * 0.325 }}
+          className="w-full flex-1 items-center gap-2 overflow-hidden rounded-3xl bg-neutral-n20 p-7">
           <Text className="font-UrbanistSemiBold text-2xl text-muted-10 antialiased">
             {data.title}
           </Text>
@@ -250,7 +255,7 @@ const StaysScreen = () => {
             </View>
           </View>
           {/* perks */}
-          <View className="flex-row items-center gap-4">
+          <View className="flex-row items-center gap-4 border-b border-muted-8/20">
             <View className="h-12 w-12 items-center justify-center">
               <TreePalmIcon strokeWidth={1.5} color="#454545" />
             </View>
@@ -261,15 +266,54 @@ const StaysScreen = () => {
               <Text className="font-urbanist text-muted-8">Dive right in</Text>
             </View>
           </View>
-          {/* description */}
-          <View className="border-y border-muted-8/20 py-2">
-            <Text className="font-UrbanistSemiBold text-xl text-muted-10">
-              About the place
-            </Text>
+          <View className="my-4 flex w-full flex-col gap-y-4 pb-2">
+            {/* description */}
+            <View className="w-full border-b border-muted-8/20 py-2">
+              <Text className="font-UrbanistSemiBold text-xl text-muted-10">
+                About the place
+              </Text>
 
-            <Text className="line-clamp-4 font-UrbanistMedium">
-              Make some memories at this unique place with friends and family
-            </Text>
+              <Text className="line-clamp-4 font-UrbanistMedium">
+                Make some memories at this unique place with friends and family
+              </Text>
+            </View>
+            {/* where u sleep */}
+            <View className="w-full gap-2 border-b border-muted-8/20 py-2">
+              <Text className="font-UrbanistSemiBold text-xl text-muted-10">
+                Where you'll sleep
+              </Text>
+
+              <View className="h-40 w-48 justify-between rounded-xl border border-muted-8/20 px-4 py-8">
+                <BedDouble color="#454545" size={24} strokeWidth={1.5} />
+                <View className="gap-1">
+                  <Text className="font-urbanistBold text-xl text-muted-10">
+                    Bedroom
+                  </Text>
+                  <Text className="font-urbanist text-muted-8">
+                    1 Queen Sized
+                  </Text>
+                </View>
+              </View>
+            </View>
+            {/* amenities */}
+            <View className="w-full gap-2 border-b border-muted-8/20 py-2">
+              <Text className="font-UrbanistSemiBold text-xl text-muted-10">
+                What this place offers
+              </Text>
+              {amenityKeys.slice(0, 5).map((v) => (
+                <View key={v} className="flex-row items-center gap-4">
+                  <AmenityIcon name={v} color="#454545" size={35} />
+                  <Text className="font-UrbanistMedium text-lg">{v}</Text>
+                </View>
+              ))}
+              {amenityKeys.length > 5 && (
+                <View className="w-full items-center rounded-lg border p-4 text-muted-8">
+                  <Text className="font-urbanistBold text-lg text-muted-10">
+                    Show All {amenityKeys.length} amenities
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </Animated.ScrollView>
@@ -284,7 +328,7 @@ const BottomCTA = () => {
   return (
     <View className="h-28 w-full flex-row items-center justify-between bg-neutral-n20 px-4 shadow shadow-muted-7/40">
       <View className="">
-        <Text className="font-urbanistSemiBold text-xl text-muted-10">
+        <Text className="font-urbanistBold text-xl text-muted-12">
           INR 4500
         </Text>
         <Text>{data.baseGuest} Guests</Text>

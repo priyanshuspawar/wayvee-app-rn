@@ -14,7 +14,7 @@ import { useUserLocation } from '~/utils/hooks/useUserLocation';
 const Tab = createBottomTabNavigator();
 
 const HomeTabs = () => {
-  const location = useUserLocation();
+  const { location } = useUserLocation();
   const { setUserLocation } = userStore();
 
   useEffect(() => {

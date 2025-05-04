@@ -6,7 +6,9 @@ export function useUserLocation() {
     latitude: number;
     longitude: number;
   } | null>(null);
-
+  const [currentRegionCode, setCurrentRegionCode] = useState<null | string>(
+    null
+  );
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -15,13 +17,13 @@ export function useUserLocation() {
         return;
       }
 
-      const {
-        coords: { latitude, longitude },
-      } = await Location.getCurrentPositionAsync({});
-
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const [place] = await Location.reverseGeocodeAsync(coords);
+      setCurrentRegionCode(place?.isoCountryCode ?? null);
+      const { latitude, longitude } = coords;
       setLocation({ latitude, longitude });
     })();
   }, []);
 
-  return location;
+  return { location, currentRegionCode };
 }

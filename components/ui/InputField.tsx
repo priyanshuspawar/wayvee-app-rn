@@ -1,7 +1,14 @@
 import clsx from 'clsx';
 import { useState, useRef, useEffect } from 'react';
 import { Controller, Control, FieldError } from 'react-hook-form';
-import { View, TextInput, TextInputProps, Animated } from 'react-native';
+import {
+  View,
+  TextInput,
+  TextInputProps,
+  Animated,
+  TextStyle,
+} from 'react-native';
+import MapView from 'react-native-maps';
 
 type InputFieldProps = {
   name: string;
@@ -12,6 +19,8 @@ type InputFieldProps = {
   inputProps?: TextInputProps;
   first?: boolean;
   last?: boolean;
+  straight?: boolean;
+  labelStyle?: TextStyle;
 };
 
 const InputField = ({
@@ -21,8 +30,10 @@ const InputField = ({
   control,
   first,
   last,
+  straight,
   rules = {},
   inputProps,
+  labelStyle,
 }: InputFieldProps) => {
   return (
     <Controller
@@ -43,6 +54,7 @@ const InputField = ({
           error={error}
           value={value}
           inputProps={inputProps}
+          straight={straight}
         />
       )}
     />
@@ -59,6 +71,8 @@ type InputFieldInnerProps = {
   last?: boolean;
   error?: FieldError;
   inputProps?: TextInputProps;
+  labelStyle?: TextStyle;
+  straight?: boolean;
 };
 
 const InputFieldInner = ({
@@ -70,6 +84,8 @@ const InputFieldInner = ({
   error,
   value,
   inputProps,
+  labelStyle: customLabelStyle,
+  straight,
 }: InputFieldInnerProps) => {
   const [isFocused, setIsFocused] = useState(false);
   const labelAnim = useRef(new Animated.Value(0)).current;
@@ -91,18 +107,18 @@ const InputFieldInner = ({
     }),
     fontSize: labelAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [14, 12],
+      outputRange: [16, 12],
     }),
   };
 
   return (
     <View
       className={clsx(
-        'relative flex h-[6vh] w-full justify-center px-2',
+        'relative flex h-[6vh] w-full justify-center',
         {
           'rounded-tl-xl rounded-tr-xl': first,
           'rounded-bl-xl rounded-br-xl': last,
-          'rounded-xl': !first && !last,
+          'rounded-xl': !first && !last && !straight,
         },
         { 'border-[1.2px]': isFocused },
         { 'border-[0.5px]': !isFocused },
@@ -114,7 +130,7 @@ const InputFieldInner = ({
       <View className="relative flex">
         <Animated.Text
           className={clsx(
-            'absolute left-0 font-urbanist',
+            'absolute left-0 px-2 font-UrbanistMedium',
             {
               'text-red-500': error?.message,
               'text-muted-8': !error?.message,
@@ -125,7 +141,7 @@ const InputFieldInner = ({
           {label}
         </Animated.Text>
         <TextInput
-          className="h-full bg-transparent font-urbanist text-base text-muted-12"
+          className="h-full bg-transparent px-2 pt-2 font-urbanist text-lg text-muted-12"
           onFocus={() => setIsFocused(true)}
           style={{ padding: 0, margin: 0 }}
           onBlur={() => {
@@ -137,6 +153,7 @@ const InputFieldInner = ({
           {...inputProps}
         />
       </View>
+      <MapView className="h-56 w-full" />
     </View>
   );
 };
