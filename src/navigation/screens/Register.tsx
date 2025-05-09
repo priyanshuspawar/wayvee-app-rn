@@ -1,13 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import axios from 'axios';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Alert } from 'react-native';
 import z from 'zod';
+
+import { RootStackParamList } from '../types';
 
 import { Container } from '~/components/Container';
 import Button from '~/components/ui/Button';
 import DatePicker from '~/components/ui/DatePicker';
 import InputField from '~/components/ui/InputField';
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
+
 const Register = () => {
   const schema = z.object({
     firstName: z.string(),
@@ -15,19 +23,56 @@ const Register = () => {
     dateOfBirth: z.custom((val) => dayjs.isDayjs(val), {
       message: 'Not valid date type',
     }),
-    phoneNumber: z.string(),
+    email: z.string().email(),
   });
   const { control, handleSubmit } = useForm({
     resolver: zodResolver(schema),
   });
-  const submit = (e: any) => {
-    console.log(e);
+  const [isLoading, setLoading] = useState(false);
+  const navigation = useNavigation<NavProp>();
+  const submit = async (formData: any) => {
+    try {
+      console.log(formData);
+      const data = {
+        firstname: formData.firstName,
+        lastname: formData.lastName,
+        email: formData.email, // make dynamic if needed
+        dateOfBirth: dayjs(formData.dateOfBirth)
+          .format('YYYY/MM/DD')
+          .toString(),
+      };
+      setLoading(true);
+      console.log(data);
+      const response = await axios.post(
+        `${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/register`,
+        // 'http://localhost:5000/api/auth/register',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('✅ Success:', response.data);
+      Alert.alert('Success', 'Account registered successfully!');
+      navigation.navigate('Login');
+    } catch (error: any) {
+      console.error('❌ Error:', error.response?.data || error.message);
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Something went wrong'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <Container className="p-4">
       <Pressable
         onPress={() => {
           //   router.back();
+          navigation.goBack();
         }}
         className="flex flex-row justify-between py-2">
         <Text className="font-urbanist text-primary-normal">back</Text>
@@ -86,11 +131,11 @@ const Register = () => {
           <Text className="font-UrbanistSemiBold">Phone Number</Text>
           <InputField
             control={control}
-            name="phoneNumber"
-            label="Phone number"
+            name="email"
+            label="Email"
             inputProps={{
-              keyboardType: 'phone-pad',
-              autoComplete: 'tel',
+              keyboardType: 'email-address',
+              autoComplete: 'email',
               enterKeyHint: 'done',
             }}
           />
@@ -120,7 +165,11 @@ const Register = () => {
             .
           </Text>
         </View>
-        <Button label="Agree and continue" onPress={handleSubmit(submit)} />
+        <Button
+          label="Agree and continue"
+          onPress={handleSubmit(submit)}
+          isLoading={isLoading}
+        />
       </View>
     </Container>
   );

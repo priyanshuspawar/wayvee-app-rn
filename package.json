@@ -15,6 +15,7 @@
     "@expo-google-fonts/urbanist": "^0.3.0",
     "@expo/vector-icons": "^14.0.0",
     "@hookform/resolvers": "^5.0.1",
+    "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.0.5",
     "@react-navigation/drawer": "^7.3.9",
     "@react-navigation/native": "^7.0.3",
@@ -25,6 +26,7 @@
     "dayjs": "^1.11.13",
     "expo": "^52.0.44",
     "expo-constants": "~17.0.8",
+    "expo-file-system": "~18.0.12",
     "expo-font": "~13.0.4",
     "expo-image-picker": "~16.0.6",
     "expo-linear-gradient": "^14.0.2",
@@ -49,6 +51,7 @@
     "react-native-get-random-values": "^1.11.0",
     "react-native-google-places-autocomplete": "^2.5.7",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "1.18.0",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-reanimated": "~3.16.1",
@@ -61,8 +64,7 @@
     "tailwind-merge": "^3.1.0",
     "tw-merge": "^0.0.1-alpha.3",
     "zod": "^3.24.2",
-    "zustand": "^4.5.1",
-    "expo-file-system": "~18.0.12"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

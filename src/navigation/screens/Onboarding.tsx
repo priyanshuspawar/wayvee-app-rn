@@ -45,10 +45,10 @@ const Onboard = () => {
         // source={require('assets/background-1.jpg')
         // }
         style={{
-          backgroundImage: 'requireassets/background-1.jpg',
+          backgroundImage: require('@Assets/background-1.jpg'),
         }}
         collapsable>
-        <StatusBar translucent />
+        <StatusBar translucent hidden />
         <ImageBackground
           className="flex h-full w-full justify-end"
           source={require('assets/background-1.jpg')}>
@@ -77,7 +77,7 @@ const Onboard = () => {
                 get live travel updates to make every trip effortless and
                 stress-free
               </Text>
-              <View className="h-1 w-full flex-row justify-between">
+              {/* <View className="h-1 w-full flex-row justify-between">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Pressable
                     key={i}
@@ -87,7 +87,7 @@ const Onboard = () => {
                     )}
                   />
                 ))}
-              </View>
+              </View> */}
               <View className="flex w-full flex-row justify-between">
                 <PillButton
                   onPress={() => {

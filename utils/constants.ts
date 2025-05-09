@@ -55,6 +55,8 @@ export const amenityKeys: AmenityIcons[] = [
   'Wifi',
   'Workspace',
 ];
+export const DEFAULT_USER_URI =
+  'https://static.vecteezy.com/system/resources/previews/001/840/618/large_2x/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-free-vector.jpg';
 export const amenities = [
   { id: 'AirCondition', title: 'Air Condition' },
   { id: 'BbqGrill', title: 'BBQ Grill' },

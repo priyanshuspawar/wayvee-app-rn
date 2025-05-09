@@ -1,9 +1,5 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-
-async function save(key: string, value: any) {
-  await SecureStore.setItemAsync(key, value);
-}
 
 async function getValueFromSecureStore(key: string) {
   return await SecureStore.getItemAsync(key);
@@ -32,6 +28,9 @@ export const initializeAuth = async (payload: { email: string }) => {
   try {
     await axios.post(`${BASE_URL}/auth`, payload);
   } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log(error.message);
+    }
     throw error;
   }
 };

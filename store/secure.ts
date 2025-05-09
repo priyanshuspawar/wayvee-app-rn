@@ -9,6 +9,7 @@ export async function getValueFor(key: string) {
     const result = await SecureStore.getItemAsync(key);
     return result;
   } catch (error) {
+    console.error(error);
     alert('No values stored under that key.');
     return null;
   }

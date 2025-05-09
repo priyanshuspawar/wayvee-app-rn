@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 type ButtonProps = {
   label: string;
@@ -8,12 +8,14 @@ type ButtonProps = {
   variant?: 'primary' | 'outlined';
   className?: string;
   disabled?: boolean;
+  isLoading?: boolean;
 };
 
 const Button = ({
   label,
   onPress,
   icon: Icon,
+  isLoading,
   variant = 'primary',
   className = '',
   disabled = false,
@@ -34,13 +36,18 @@ const Button = ({
         ${className}
       `}>
       {Icon && <View className="mr-2">{Icon}</View>}
-      <Text
-        className={`
+
+      {isLoading ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <Text
+          className={`
           font-UrbanistSemiBold text-xl
           ${isOutlined ? 'text-primary-normal' : 'text-white'}
         `}>
-        {label}
-      </Text>
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 };

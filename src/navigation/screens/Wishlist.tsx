@@ -1,10 +1,12 @@
-import { View, Text } from 'react-native';
+import { Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Wishlist = () => {
   return (
-    <View>
-      <Text>Wishlist</Text>
-    </View>
+    <SafeAreaView className="flex-1 bg-neutral-n40 px-4 pt-28">
+      <Text className="font-UrbanistSemiBold text-4xl">Wishlist</Text>
+      <Text className="font-UrbanistMedium text-lg">Nothing here</Text>
+    </SafeAreaView>
   );
 };
 

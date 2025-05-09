@@ -9,13 +9,23 @@ import {
   Sparkles,
   Tent,
 } from 'lucide-react-native';
-import { View, Text, Image, TextInput, SafeAreaView } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import React, { Dispatch, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  SafeAreaView,
+  TouchableOpacity,
+} from 'react-native';
+import { FlatList, Pressable } from 'react-native-gesture-handler';
+import { useStore } from 'zustand';
 
 import { RootStackParamList } from '../types';
 
 import StayCard from '~/components/StayCard';
 // import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthContext } from '~/store/auth';
 import { dataStays } from '~/utils/constants';
 import { vh, vw } from '~/utils/dimensions';
 
@@ -23,12 +33,13 @@ import { vh, vw } from '~/utils/dimensions';
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 const Explore = () => {
   const navigation = useNavigation<NavProp>();
+  const [active, setActive] = useState(0);
   return (
-    <SafeAreaView className="flex-1 bg-neutral-n40">
+    <SafeAreaView className="flex-1 bg-neutral-n10 pt-10">
       <FlatList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={<Header />}
+        ListHeaderComponent={<Header num={active} setNum={setActive} />}
         stickyHeaderIndices={[0]}
         stickyHeaderHiddenOnScroll={false}
         className="bg-transparent"
@@ -56,30 +67,56 @@ const Explore = () => {
 
 export default Explore;
 
-const Header = () => {
+const Header = ({
+  num,
+  setNum,
+}: {
+  num: number;
+  setNum: Dispatch<React.SetStateAction<number>>;
+}) => {
+  const store = React.useContext(AuthContext);
+  const loggedUser = useStore(store!, (s) => s.user);
+  const navigation = useNavigation<NavProp>();
+
+  // Tab configuration
+  const tabs = [
+    { id: 0, icon: Tent, label: 'Stays' },
+    { id: 1, icon: Sailboat, label: 'Trips' },
+    { id: 2, icon: Handshake, label: 'Agents' },
+    { id: 3, icon: ConciergeBell, label: 'Services' },
+  ];
+
   return (
-    <View className="mb-4 flex flex-1 gap-4 bg-neutral-n40 px-4">
-      {/* greeings and avatar */}
+    <View className="mb-4 flex flex-1 gap-4 bg-neutral-n10 px-4">
+      {/* Greetings and avatar */}
       <View className="flex w-full flex-row items-center justify-between">
         <View className="flex-row">
           <Text className="font-urbanistBold text-2xl">Hello 👋 </Text>
-          <Text className="font-urbanist text-2xl">Jane Copper</Text>
+          <Text className="font-urbanist text-2xl">
+            {loggedUser?.firstname} {loggedUser?.lastname}
+          </Text>
         </View>
-        <View>
+        <Pressable
+          onPress={() => {
+            navigation.navigate('Profile');
+          }}>
           <Image
             className="h-12 w-12 rounded-full"
             source={{
-              uri: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+              uri: loggedUser?.picture
+                ? loggedUser.picture
+                : 'https://static.vecteezy.com/system/resources/previews/001/840/618/large_2x/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-free-vector.jpg',
             }}
           />
-        </View>
+        </Pressable>
       </View>
-      {/* seach button */}
-      <View className="flex h-14 w-full flex-row items-center shadow shadow-muted-7/40">
+
+      {/* Search button */}
+      <View className="flex h-14 w-full flex-row items-center shadow shadow-muted-4/40">
         <TextInput
           onChange={() => {}}
           placeholder="Search here"
-          className="h-full w-full rounded-[2rem] bg-neutral-n20 px-4 font-urbanist"
+          className="h-full w-full rounded-[2rem] bg-neutral-n30 px-4 font-urbanist"
           keyboardType="web-search"
         />
         <View className="absolute right-2 flex flex-row items-center overflow-hidden rounded-3xl">
@@ -100,28 +137,33 @@ const Header = () => {
           </View>
         </View>
       </View>
-      {/* tabs */}
+
+      {/* Tabs */}
       <View className="flex flex-row items-center justify-between">
-        {/* stays */}
-        <View className="w-[5.5rem] items-center justify-center border-b border-muted-8 py-2.5 shadow shadow-muted-7/40">
-          <Tent color="#454545" width={24} strokeWidth={1.5} />
-          <Text className="font-urbanist text-xs">Stays</Text>
-        </View>
-        {/* Trips */}
-        <View className="w-[5.5rem] items-center justify-center pt-2.5 shadow shadow-muted-7/40">
-          <Sailboat color="#8c8c8c" width={24} strokeWidth={1.5} />
-          <Text className="font-urbanist text-xs text-muted-8">Trips</Text>
-        </View>
-        {/* agents */}
-        <View className="w-[5.5rem] items-center justify-center pt-2.5 shadow shadow-muted-7/40">
-          <Handshake color="#8c8c8c" width={24} strokeWidth={1.5} />
-          <Text className="font-urbanist text-xs text-muted-8">Agents</Text>
-        </View>
-        {/* services */}
-        <View className="w-[5.5rem] items-center justify-center pt-2.5 shadow shadow-muted-7/40">
-          <ConciergeBell color="#8c8c8c" width={24} strokeWidth={1.5} />
-          <Text className="font-urbanist text-xs text-muted-8">Services</Text>
-        </View>
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = num === tab.id;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              className={`w-[5.5rem] items-center justify-center pt-2.5 shadow shadow-muted-4/40 ${
+                isActive ? 'border-primary border-b' : ''
+              }`}
+              onPress={() => setNum(tab.id)}>
+              <Icon
+                color={isActive ? '#454545' : '#8c8c8c'}
+                width={24}
+                strokeWidth={1.5}
+              />
+              <Text
+                className={`font-urbanist text-xs ${
+                  isActive ? 'text-primary' : 'text-muted-8'
+                }`}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );

@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { useState, useContext } from 'react';
@@ -8,11 +10,14 @@ import Modal from 'react-native-modal';
 import z from 'zod';
 import { useStore } from 'zustand';
 
+import { RootStackParamList } from '../types';
+
 import { initializeAuth } from '~/apis/auth';
 import GoogleIcon from '~/assets/google-icon.svg';
 import { Container } from '~/components/Container';
 import InputField from '~/components/ui/InputField';
 import { AuthContext } from '~/store/auth';
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Login = () => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -37,9 +42,14 @@ const Login = () => {
     mutationKey: ['auth'],
     mutationFn: initializeAuth,
   });
+  const [isLoading, setIsloading] = useState(false);
+  const navigation = useNavigation<NavProp>();
   const handleLogin = async (data: { email: string }) => {
     try {
+      setIsloading(true);
       await mutateAsync(data);
+      // navigation.navigate("")
+      navigation.navigate('Verify', { email: data.email });
     } catch (error) {
       if (
         error instanceof AxiosError &&
@@ -51,13 +61,21 @@ const Login = () => {
         setModalVisible(true);
         return;
       }
+      console.log(error);
       setError('root', { message: 'Failed to process your request' });
+    } finally {
+      setIsloading(false);
     }
   };
 
   return (
     <Container className="flex-col items-center justify-between px-4 py-8">
-      <Modal isVisible={isModalVisible} collapsable>
+      <Modal
+        isVisible={isModalVisible}
+        collapsable
+        onBackdropPress={() => {
+          setModalVisible(false);
+        }}>
         <View className="flex-1 items-center justify-center">
           <View className="flex h-fit w-[90vw] flex-col items-center  rounded-xl bg-neutral-n50 p-2">
             <Text className="w-full text-center font-UrbanistMedium text-lg">
@@ -73,7 +91,7 @@ const Login = () => {
         </View>
       </Modal>
       <View className="mb-6 flex w-full items-end">
-        <Text className="font-urbanist">skip</Text>
+        {/* <Text className="font-urbanist">skip</Text> */}
       </View>
       {/* contents */}
       <View className="flex w-full flex-1 gap-4">
@@ -116,7 +134,7 @@ const Login = () => {
             onPress={handleSubmit(handleLogin)}
             className="my-4 flex w-full items-center rounded-xl bg-primary-normal p-3">
             <Text className="font-UrbanistSemiBold text-lg text-muted-1">
-              Log in
+              {isLoading ? 'Loading .. ' : 'Log in'}
             </Text>
           </Pressable>
         </View>

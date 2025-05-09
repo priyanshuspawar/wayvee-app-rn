@@ -38,22 +38,22 @@ export default function StayCard({
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="mx-4 mb-8 flex rounded-3xl bg-neutral-n20 shadow-lg shadow-muted-7/40">
+      className="relative mx-4 mb-8 flex flex-1 rounded-3xl bg-muted-2 shadow-lg shadow-muted-7/40">
       <Image className="h-64 w-full rounded-t-3xl" source={{ uri: image }} />
-      <View className="flex w-full flex-row items-start justify-between p-3">
+      <View className="flex w-full flex-row items-start justify-between px-4 py-4">
         <View>
-          <Text className="text-mu font-UrbanistSemiBold text-lg capitalize">
+          <Text className="text-mu font-UrbanistSemiBold capitalize">
             {title}
           </Text>
-          <Text className="font-urbanistMedium text-muted-8">
+          <Text className="font-urbanistMedium text-pretty text-muted-8">
             {baseGuest} Guests • {perks.join(', ')}
           </Text>
           <View className="flex flex-row">
             <Text className="font-urbanistBold underline">INR {price} </Text>
-            <Text className="font-UrbanistMedium text-muted-8">/ night</Text>
+            <Text className="font-UrbanistSemiBold text-muted-8">/ night</Text>
           </View>
         </View>
-        <View className="items-end">
+        {/* <View className="items-end">
           <View className="flex flex-row items-center gap-1">
             <Star width={10} color="#000" fill="#000" />
             <Text className="font-urbanist text-muted-10">
@@ -63,7 +63,7 @@ export default function StayCard({
           <Text className="font-urbanist text-muted-8">
             {kmdistance}km away
           </Text>
-        </View>
+        </View> */}
       </View>
     </TouchableOpacity>
   );

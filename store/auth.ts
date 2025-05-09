@@ -7,7 +7,6 @@ interface User {
   lastname: string;
   email: string;
   verified: boolean;
-  phoneNumber: string;
   picture: string;
   countryCode: string;
   governmentId: string | null;

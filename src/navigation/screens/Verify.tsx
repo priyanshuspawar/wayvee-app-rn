@@ -1,17 +1,63 @@
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import axios from 'axios';
 import { useRouter } from 'expo-router';
-import { useState, useContext } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React, { useState, useContext, useRef, RefObject } from 'react';
+import { View, Text, Pressable, Alert, TextInput } from 'react-native';
 import { useStore } from 'zustand';
+
+import { RootStackParamList } from '../types';
 
 import { Container } from '~/components/Container';
 import Button from '~/components/ui/Button';
 import OtpField from '~/components/ui/otp-field';
 import { AuthContext } from '~/store/auth';
+import { save } from '~/store/secure';
+import { OtpApiResponse } from '~/utils/responseTypes';
 
-const VerifySceeen = () => {
-  const [codes, setCodes] = useState<string[] | undefined>(Array(6).fill(''));
+type NavProp = NativeStackNavigationProp<RootStackParamList>;
+
+const VerifySceeen = ({ route }: { route: { params: { email: string } } }) => {
+  const email = route.params?.email;
+  const [codes, setCodes] = useState<string[]>(Array(6).fill(''));
+  const refs = useRef<RefObject<TextInput>[]>([]);
+
+  // Safe ref creation only once
+  if (refs.current.length === 0) {
+    for (let i = 0; i < 6; i++) {
+      refs.current.push(React.createRef<TextInput>());
+    }
+  }
+  const navigation = useNavigation<NavProp>();
   const { registeringUserMail } = useStore(useContext(AuthContext)!, (s) => s);
+  const store = React.useContext(AuthContext);
+  const logUser = useStore(store!, (s) => s.logUser);
   const router = useRouter();
+  const submit = async () => {
+    try {
+      if (!codes || !email) {
+        return;
+      }
+      const otp = codes.join('');
+      // console.log(otp);
+      const res = await axios.post<OtpApiResponse>(
+        process.env.EXPO_PUBLIC_BACKEND_URL! + '/auth/verify-otp',
+        {
+          email,
+          otp,
+        }
+      );
+      await save('token', res.data.token);
+      logUser(res.data.data);
+
+      Alert.prompt('Login Success', 'Lets get You onboard', (done) => {
+        navigation.replace('Home');
+      });
+    } catch (error) {
+      console.log('OTP error', error);
+      Alert.alert('Failed to authenticate');
+    }
+  };
   return (
     <Container className="flex p-4">
       <Pressable
@@ -40,18 +86,16 @@ const VerifySceeen = () => {
             {registeringUserMail && <Text>{registeringUserMail}</Text>}
             {/* otp container */}
             <View className="relative flex h-12 w-[60vw] flex-row justify-evenly overflow-hidden rounded-xl border-[0.8px] border-muted-10">
-              {codes &&
-                codes.map((code, i) => {
-                  return (
-                    <OtpField
-                      code={code}
-                      codes={codes}
-                      key={i}
-                      setCodes={setCodes}
-                      i={i}
-                    />
-                  );
-                })}
+              {codes.map((code, i) => (
+                <OtpField
+                  key={i}
+                  i={i}
+                  code={code}
+                  codes={codes}
+                  setCodes={setCodes}
+                  refs={refs.current}
+                />
+              ))}
             </View>
             <View className="flex flex-row">
               <Text className="font-urbanist">Haven't received an SMS ? </Text>
@@ -60,12 +104,7 @@ const VerifySceeen = () => {
               </Text>
             </View>
           </View>
-          <Button
-            label="Continue"
-            onPress={() => {
-              console.log('hello');
-            }}
-          />
+          <Button label="Continue" onPress={submit} />
         </View>
       </View>
     </Container>

@@ -144,7 +144,7 @@ const StaysScreen = () => {
         // className={clsx('absolute z-10 w-full flex-row justify-between px-2')}
         style={[
           {
-            paddingTop: top,
+            paddingTop: top + 30,
             top: 0,
             paddingBottom: 10,
             alignItems: 'flex-end',
@@ -333,7 +333,9 @@ const BottomCTA = () => {
         </Text>
         <Text>{data.baseGuest} Guests</Text>
       </View>
-      <Pressable className="h-14 w-40 items-center justify-center rounded-[2rem] bg-primary-normal">
+      <Pressable
+        onPress={() => {}}
+        className="h-14 w-40 items-center justify-center rounded-[2rem] bg-primary-normal">
         <Text className="font-UrbanistSemiBold text-lg text-muted-2">
           Reserve
         </Text>
