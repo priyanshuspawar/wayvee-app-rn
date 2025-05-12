@@ -8,15 +8,17 @@ export type RootStackParamList = {
   Verify: { email: string };
   Profile: undefined;
   ApplyAgent: undefined;
+  VerifyAccount: undefined;
   AgentPanel: undefined;
   CreateTrip: undefined;
   CreateAgentReachOutProfile: undefined;
   Bookings: undefined;
+  UserMessageScreen: { agentId: string };
 
   // Authenticated screens
   CreateStay: undefined;
   Home: undefined;
-  Stay: { stayId: string }; // Example param, adjust as needed
+  Stay: { stay: any }; // Example param, adjust as needed
 };
 
 export type NavProp = NativeStackNavigationProp<RootStackParamList>;

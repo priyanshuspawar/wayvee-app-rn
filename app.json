@@ -15,7 +15,9 @@
       [
         "expo-font",
         {
-          "fonts": ["node_modules/@expo-google-fonts/urbanist"]
+          "fonts": [
+            "node_modules/@expo-google-fonts/urbanist"
+          ]
         }
       ],
       [
@@ -30,7 +32,8 @@
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -44,7 +47,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },

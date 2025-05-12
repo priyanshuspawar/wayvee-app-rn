@@ -30,4 +30,51 @@ interface OtpApiResponse {
   token: string;
 }
 
-export type { OtpApiResponse };
+interface Stay {
+  id: string;
+  isPublished: boolean;
+  hostId: string;
+  title: string | null;
+  location: {
+    x: number;
+    y: number;
+  } | null;
+  displayImages: {
+    id: string;
+    imageUrl: string;
+    type: string;
+  }[];
+  perks: string[];
+  baseGuest: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  description: string | null;
+  currentTab: number;
+  pricePerNight: string | null; // decimal returns as string
+  perPersonIncrement: string | null; // decimal returns as string
+  maxOccupancy: number | null;
+  amenities: string[];
+  availability: boolean | null;
+  typeOfStay: string | null; // char returns as string
+  propertyAccess: string | null; // char returns as string
+  rating: string; // decimal returns as string
+  discount: string | null; // decimal returns as string
+  address: {
+    name: string;
+    streetAddress: string;
+    nearby_landmark: string;
+    district: string;
+    city: string;
+    state: string;
+    pincode: string;
+  } | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface GetStayResponse {
+  message: string;
+  data: Stay;
+}
+
+export type { OtpApiResponse, GetStayResponse, Stay };

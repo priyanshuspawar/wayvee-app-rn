@@ -1,5 +1,6 @@
 import { StatusBar } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { twMerge } from 'tailwind-merge';
 
@@ -20,7 +21,9 @@ export const Container = ({
           className
         )}>
         <StatusBar hidden />
-        <ScrollView scrollEnabled={enableScroll}>{children}</ScrollView>
+        <KeyboardAwareScrollView scrollEnabled={enableScroll}>
+          {children}
+        </KeyboardAwareScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

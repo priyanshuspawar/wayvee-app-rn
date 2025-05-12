@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Heart, Search, Flame, Briefcase, Globe } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar, Platform, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import BookingsScreen from '../screens/Bookings';
 import CommunityScreen from '../screens/Community';
@@ -17,27 +17,38 @@ import { useUserLocation } from '~/utils/hooks/useUserLocation';
 const Tab = createBottomTabNavigator();
 
 const HomeTabs = () => {
-  const { location } = useUserLocation();
-  const { setUserLocation } = userStore();
+  const { location, currentRegionCode } = useUserLocation();
+  const { setUserLocation, setUserRegionCode } = userStore();
+  const { top, bottom } = useSafeAreaInsets();
 
   useEffect(() => {
+    // console.log(currentRegionCode);
     if (location?.latitude && location?.longitude) {
+      setUserRegionCode(currentRegionCode);
       setUserLocation({ x: location.longitude, y: location.latitude });
     }
   }, [location]);
-
+  const os = Platform.OS;
+  const tabBarStyle = {
+    paddingTop: vh(10),
+    paddingVertical: vh(20),
+    height: vh(80),
+  };
   return (
-    <SafeAreaView className="flex-1">
+    <View
+      style={
+        os !== 'ios' && {
+          paddingTop: top,
+          bottom,
+        }
+      }
+      className="flex-1 bg-neutral-n10">
       <StatusBar hidden />
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: '#a787ec',
-          tabBarStyle: {
-            paddingTop: vh(10),
-            paddingVertical: vh(20),
-            height: vh(80),
-          },
+          tabBarStyle,
         }}>
         <Tab.Screen
           name="Explore"
@@ -75,7 +86,7 @@ const HomeTabs = () => {
           }}
         />
       </Tab.Navigator>
-    </SafeAreaView>
+    </View>
   );
 };
 

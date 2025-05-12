@@ -1,28 +1,21 @@
 import MyLocation from '@Assets/my-location.svg';
+import axios from 'axios';
 import clsx from 'clsx';
 import * as Location from 'expo-location';
-import { ChevronLeft, MapPin } from 'lucide-react-native';
-import React, {
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-  Dispatch,
-} from 'react';
+import debounce from 'lodash.debounce';
+import { ChevronLeft, MapPin, X } from 'lucide-react-native';
+import React, { Dispatch, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   TextInput,
-  TextInputProps,
   Pressable,
   Alert,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
-import {
-  GooglePlacesAutocomplete,
-  GooglePlacesAutocompleteRef,
-} from 'react-native-google-places-autocomplete';
-import MapView, { Marker, Region, PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, Region, PROVIDER_GOOGLE } from 'react-native-maps';
 import Animated, {
   Easing,
   FadeIn,
@@ -33,6 +26,8 @@ import Animated, {
 import { useListingStore } from '~/store/useListingStore';
 import userStore from '~/store/user';
 
+const GOOGLE_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_API_KEY!;
+
 const MapInput = ({
   isInputFocused,
   setIsInputFocus,
@@ -41,39 +36,124 @@ const MapInput = ({
 }: {
   isInputFocused: 'active' | null;
   setIsInputFocus: Dispatch<React.SetStateAction<'active' | null>>;
-  marker: {
-    latitude: number;
-    longitude: number;
-  } | null;
+  marker: { latitude: number; longitude: number } | null;
   setMarker: Dispatch<
-    React.SetStateAction<{
-      latitude: number;
-      longitude: number;
-    } | null>
+    React.SetStateAction<{ latitude: number; longitude: number } | null>
   >;
 }) => {
-  const { setAddressMarker, setRegion: setStoreRegion } = useListingStore();
+  const {
+    setAddressMarker,
+    setRegion: setStoreRegion,
+    setEnableFullMode,
+    stay,
+  } = useListingStore();
   const { user_location } = userStore();
   const [region, setRegion] = useState<Region>({
-    latitude: user_location?.y ?? 120,
-    longitude: user_location?.x ?? -120,
+    latitude: marker ? marker.latitude : (user_location?.y ?? 120),
+    longitude: marker ? marker.longitude : (user_location?.x ?? -120),
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   });
 
   const mapRef = useRef<MapView | null>(null);
+  const inputRef = useRef<TextInput | null>(null);
 
-  // Get current location
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [predictions, setPredictions] = useState<any[]>([]);
+
+  const fetchPredictions = debounce(async (input: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json',
+        {
+          params: {
+            input,
+            key: GOOGLE_API_KEY,
+            language: 'en',
+            components: 'country:in',
+          },
+        }
+      );
+      setPredictions(response.data.predictions || []);
+    } catch (err) {
+      console.error('Prediction error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, 300);
+
+  const handleChangeText = (text: string) => {
+    setQuery(text);
+    if (text.length > 1) {
+      fetchPredictions(text);
+    } else {
+      setPredictions([]);
+    }
+  };
+  const setPrevious = async () => {
+    if (!stay.location) {
+      return;
+    }
+    const addressArray = await Location.reverseGeocodeAsync({
+      latitude: stay.location.y,
+      longitude: stay.location.x,
+    });
+    const address = addressArray?.[0];
+
+    if (address) {
+      const fullAddress = `${address.name ?? ''} ${address.street ?? ''}, ${address.city ?? ''}, ${address.region ?? ''}, ${address.postalCode ?? ''}, ${address.country ?? ''}`;
+      setQuery(fullAddress);
+    }
+  };
+  useEffect(() => {
+    setPrevious();
+  }, []);
+
+  const handleSelect = async (placeId: string, description: string) => {
+    try {
+      const res = await axios.get(
+        'https://maps.googleapis.com/maps/api/place/details/json',
+        {
+          params: {
+            place_id: placeId,
+            key: GOOGLE_API_KEY,
+            fields: 'geometry,formatted_address',
+          },
+        }
+      );
+      const { lat, lng } = res.data.result.geometry.location;
+      const newRegion: Region = {
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      };
+
+      setMarker({ latitude: lat, longitude: lng });
+      setAddressMarker({ latitude: lat, longitude: lng });
+      setRegion(newRegion);
+      setStoreRegion(newRegion);
+      setQuery(description);
+      setPredictions([]);
+      mapRef.current?.animateToRegion(newRegion, 1000);
+      setIsInputFocus(null);
+      setEnableFullMode(false);
+    } catch (err) {
+      Alert.alert('Failed to get place details');
+    }
+  };
+
   const getCurrentLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission to access location is denied');
+      Alert.alert('Permission denied');
       return;
     }
 
     const location = await Location.getCurrentPositionAsync({});
     const { latitude, longitude } = location.coords;
-    inputRef.current?.blur();
 
     const newRegion: Region = {
       latitude,
@@ -84,12 +164,10 @@ const MapInput = ({
 
     setMarker({ latitude, longitude });
     setAddressMarker({ latitude, longitude });
-
     setRegion(newRegion);
     setStoreRegion(newRegion);
     mapRef.current?.animateToRegion(newRegion, 1000);
 
-    // ✅ Reverse geocode
     const addressArray = await Location.reverseGeocodeAsync({
       latitude,
       longitude,
@@ -98,38 +176,21 @@ const MapInput = ({
 
     if (address) {
       const fullAddress = `${address.name ?? ''} ${address.street ?? ''}, ${address.city ?? ''}, ${address.region ?? ''}, ${address.postalCode ?? ''}, ${address.country ?? ''}`;
-
-      // ✅ Set value to GooglePlacesAutocomplete input
-      inputRef.current?.setAddressText(fullAddress);
+      setQuery(fullAddress);
     }
+
     setIsInputFocus(null);
+    setEnableFullMode(false);
   };
-  const inputRef = useRef<GooglePlacesAutocompleteRef | null>(null);
-
-  const [hasText, setHasText] = useState('');
-  const getInitialRegion = async () => {
-    const location = await Location.getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
-
-    const newRegion: Region = {
-      latitude,
-      longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    };
-    mapRef.current?.animateToRegion(newRegion, 1000);
-  };
-  useEffect(() => {
-    getInitialRegion();
-  }, []);
+  console.log(marker);
   return (
     <View className="relative flex-1">
       {isInputFocused ? (
         <Animated.View className="mb-8 flex w-full flex-row items-center justify-between px-4">
           <Pressable
             onPress={() => {
-              inputRef.current?.blur();
               setIsInputFocus(null);
+              setEnableFullMode(false);
             }}>
             <ChevronLeft color="#262626" size={30} />
           </Pressable>
@@ -140,148 +201,139 @@ const MapInput = ({
         </Animated.View>
       ) : (
         <Animated.View
-          entering={FadeIn.duration(300).easing(Easing.inOut(Easing.quad))}
-          exiting={FadeOutUp.duration(300).easing(Easing.inOut(Easing.quad))}
+          entering={FadeIn}
+          exiting={FadeOutUp}
           className="mb-8 px-4">
           <Text className="font-UrbanistSemiBold text-4xl text-muted-10">
-            Where's your place located ?
+            Where's your place located?
           </Text>
           <Text className="font-UrbanistMedium text-xl text-muted-8">
-            Your address is only shared with your guest after they make
-            reservation
+            Your address is only shared with guests after they book.
           </Text>
         </Animated.View>
       )}
-      <View className="relative flex-1">
-        <GooglePlacesAutocomplete
-          ref={inputRef}
-          placeholder="Enter your address"
-          fetchDetails
-          onFail={() => {
-            Alert.alert('Failed to initilize location');
-          }}
-          onPress={(data, details = null) => {
-            const lat = details?.geometry.location.lat;
-            const lng = details?.geometry.location.lng;
 
-            if (lat && lng) {
-              const newRegion: Region = {
-                latitude: lat,
-                longitude: lng,
+      <View className="relative z-10 mt-4 items-center">
+        <View className="absolute top-4 flex w-screen items-center px-4">
+          <CustomInput
+            ref={inputRef}
+            value={query}
+            onClear={() => {
+              setQuery('');
+              setPredictions([]);
+            }}
+            loading={loading}
+            onChangeText={handleChangeText}
+            isInputFocused={isInputFocused === 'active'}
+            onFocus={() => {
+              setIsInputFocus('active');
+              setEnableFullMode(true);
+            }}
+          />
+        </View>
+
+        {predictions.length > 0 && (
+          <FlatList
+            data={predictions}
+            style={{
+              position: 'absolute',
+              top: 70,
+              width: '90%',
+              backgroundColor: '#fbfbfb',
+              borderRadius: 10,
+              zIndex: 100,
+            }}
+            keyboardShouldPersistTaps="handled"
+            keyExtractor={(item) => item.place_id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => handleSelect(item.place_id, item.description)}
+                style={{
+                  padding: 14,
+                  borderBottomWidth: 1,
+                  borderColor: '#ccc',
+                }}>
+                <Text className="font-UrbanistMedium text-base">
+                  {item.description}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
+      </View>
+
+      {isInputFocused === 'active' && query.length === 0 && (
+        <View className="top-32 w-full px-6">
+          <TouchableOpacity
+            className="flex flex-row items-center gap-2"
+            onPress={getCurrentLocation}>
+            <View className="rounded-md bg-muted-4 p-2">
+              <MyLocation width={32} height={32} />
+            </View>
+            <Text className="font-UrbanistMedium text-lg">
+              Use my current location
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {isInputFocused !== 'active' && (
+        <Animated.View
+          entering={FadeInDown}
+          exiting={FadeOutUp}
+          className="flex-1">
+          <MapView
+            ref={mapRef}
+            style={{ flex: 1 }}
+            region={region}
+            showsUserLocation
+            provider={PROVIDER_GOOGLE}
+            onPress={async (e) => {
+              const { latitude, longitude } = e.nativeEvent.coordinate;
+
+              const newRegion = {
+                latitude,
+                longitude,
                 latitudeDelta: 0.01,
                 longitudeDelta: 0.01,
               };
 
-              setMarker({ latitude: lat, longitude: lng });
-              setAddressMarker({ latitude: lat, longitude: lng });
-
               setRegion(newRegion);
-              setStoreRegion(newRegion);
+              setMarker({ latitude, longitude });
+              setAddressMarker({ latitude, longitude });
+
+              const addressArray = await Location.reverseGeocodeAsync({
+                latitude,
+                longitude,
+              });
+              const address = addressArray?.[0];
+
+              if (address) {
+                const fullAddress = `${address.name ?? ''} ${address.street ?? ''}, ${address.city ?? ''}, ${address.region ?? ''}, ${address.postalCode ?? ''}, ${address.country ?? ''}`;
+                setQuery(fullAddress);
+              }
+
               mapRef.current?.animateToRegion(newRegion, 1000);
-            }
-            setIsInputFocus(null);
-          }}
-          query={{
-            key: process.env.EXPO_PUBLIC_GOOGLE_API_KEY!,
-            language: 'en',
-          }}
-          debounce={500}
-          textInputProps={{
-            InputComp: CustomInput,
-            onFocus: () => setIsInputFocus('active'),
-            onBlur: () => setIsInputFocus(null),
-            isInputFocused,
-            onChangeText: (t) => setHasText(t),
-          }}
-          styles={{
-            container: {
-              position: 'absolute',
-              top: 25,
-              zIndex: 1,
-              paddingHorizontal: 20,
-            },
-            powered: {
-              width: '100%',
-              backgroundColor: 'white',
-            },
-            listView: {
-              width: '100%',
-            },
-            poweredContainer: {
-              backgroundColor: 'white',
-              width: '100%',
-            },
-          }}
-        />
-
-        {isInputFocused === 'active' && hasText.length === 0 && (
-          <View className="top-32 w-full px-6">
-            <TouchableOpacity
-              className="flex flex-row items-center gap-2"
-              onPress={getCurrentLocation}>
-              <View className="rounded-md bg-muted-4 p-2">
-                <MyLocation width={32} height={32} />
-              </View>
-              <Text className="font-UrbanistMedium text-lg">
-                Use my current location
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {isInputFocused !== 'active' && (
-          <Animated.View
-            entering={FadeInDown.duration(300).easing(
-              Easing.inOut(Easing.quad)
-            )}
-            exiting={FadeOutUp.duration(500).easing(Easing.inOut(Easing.quad))}
-            className="flex-1">
-            <MapView
-              ref={mapRef}
-              style={{ flex: 1 }}
-              region={region}
-              showsUserLocation
-              provider={PROVIDER_DEFAULT}
-              showsMyLocationButton={false}
-              onPress={async (e) => {
-                const { latitude, longitude } = e.nativeEvent.coordinate;
-
-                const newRegion = {
-                  latitude,
-                  longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                };
-
-                setRegion(newRegion);
-                setMarker({ latitude, longitude });
-                const addressArray = await Location.reverseGeocodeAsync({
-                  latitude,
-                  longitude,
-                });
-                const address = addressArray?.[0];
-
-                if (address) {
-                  const fullAddress = `${address.name ?? ''} ${address.street ?? ''}, ${address.city ?? ''}, ${address.region ?? ''}, ${address.postalCode ?? ''}, ${address.country ?? ''}`;
-
-                  // ✅ Set value to GooglePlacesAutocomplete input
-                  inputRef.current?.setAddressText(fullAddress);
-                }
-                mapRef.current?.animateToRegion(newRegion, 1000);
-              }}>
-              {marker && <Marker coordinate={marker} />}
-            </MapView>
-          </Animated.View>
-        )}
-      </View>
+            }}>
+            {marker && <Marker coordinate={marker} />}
+          </MapView>
+        </Animated.View>
+      )}
     </View>
   );
 };
 
-const CustomInput = forwardRef<
+const CustomInput = React.forwardRef<
   TextInput,
-  TextInputProps & { isInputFocused?: boolean }
->(({ isInputFocused, ...props }, ref) => {
+  {
+    value: string;
+    onChangeText: (text: string) => void;
+    isInputFocused: boolean;
+    loading?: boolean;
+    onFocus: () => void;
+    onClear?: () => void; // <-- NEW
+  }
+>(({ value, loading, onChangeText, isInputFocused, onFocus, onClear }, ref) => {
   return (
     <View
       className={clsx(
@@ -291,15 +343,25 @@ const CustomInput = forwardRef<
       <MapPin size={24} stroke="#262626" />
       <TextInput
         ref={ref}
-        {...props}
+        value={value}
+        onChangeText={onChangeText}
+        onFocus={onFocus}
+        placeholder="Enter your address"
         placeholderTextColor="#262626"
         className="font-UrbanistSemiBold"
-        style={{
-          height: '100%',
-          width: '95%',
-          paddingHorizontal: 5,
-        }}
+        style={{ height: '100%', width: '85%', paddingHorizontal: 6 }}
       />
+      {value.length > 2 && loading ? (
+        <ActivityIndicator
+          style={{ position: 'absolute', right: 20, top: 14 }}
+        />
+      ) : (
+        <Pressable
+          onPress={onClear} // <-- Attach handler
+          className="flex-shrink-0 rounded-full bg-muted-4 p-1">
+          <X size={16} />
+        </Pressable>
+      )}
     </View>
   );
 });

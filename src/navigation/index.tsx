@@ -5,6 +5,7 @@ import { useStore } from 'zustand';
 
 // Screens
 import AgentApplyScreen from './screens/AgentApplyScreen';
+import AgentPanel from './screens/AgentPanel';
 import ProfileScreen from './screens/ProfileScreen';
 import LoginScreen from '../navigation/screens/Login';
 import OnboardScreen from '../navigation/screens/Onboarding';
@@ -14,7 +15,9 @@ import HomeTabs from '../navigation/screens/Tabs'; // Your Tab Navigator
 import type { RootStackParamList } from '../navigation/types';
 import CreateStayScreen from './screens/CreateStay';
 import VerifySceeen from './screens/Verify';
+import VerifyAccount from './screens/VerifyAccount';
 
+import UserMessagingScreen from '~/components/UserMessage';
 import { AuthContext } from '~/store/auth';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -38,10 +41,31 @@ export function Navigation() {
             }}
           />
           <Stack.Screen
+            name="VerifyAccount"
+            component={VerifyAccount}
+            options={{
+              animation: 'fade_from_bottom',
+            }}
+          />
+          <Stack.Screen
             name="ApplyAgent"
             component={AgentApplyScreen}
             options={{
               animation: 'fade_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="AgentPanel"
+            component={AgentPanel}
+            options={{
+              animation: 'slide_from_left',
+            }}
+          />
+          <Stack.Screen
+            name="UserMessageScreen"
+            component={UserMessagingScreen}
+            options={{
+              animation: 'slide_from_left',
             }}
           />
         </Stack.Navigator>

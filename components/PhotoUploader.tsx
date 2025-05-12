@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 
+import { getValueFromSecureStore } from '~/apis/auth';
 import { useListingStore } from '~/store/useListingStore';
 import { UploadResponse } from '~/utils/responseTypes';
 
@@ -25,7 +26,7 @@ export default function PhotoUploadDrawer({
   onClose: () => void;
 }) {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const { addPictures, setTabNum } = useListingStore();
+  const { addImages, setDisplayImages } = useListingStore();
   const [uploading, setUploading] = useState(false);
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -63,25 +64,26 @@ export default function PhotoUploadDrawer({
           formData.append('files', file as any);
         })
       );
+      const token = await getValueFromSecureStore('token');
       // return;
       const response = await axios.post<UploadResponse>(
-        'http://192.168.1.73:5000/api/upload',
+        `${process.env.EXPO_PUBLIC_BACKEND_URL}/upload`,
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      console.log('Upload successful:', response.data.data);
       const structuredImages = response.data.data.map((e) => ({
         id: e.id,
-        url: e.imgUrl,
+        imageUrl: e.imgUrl,
+        type: '',
       }));
 
-      addPictures(structuredImages);
-      setTabNum(13);
+      addImages(structuredImages);
+      setDisplayImages(structuredImages);
       Alert.alert('Success', 'Images uploaded successfully.');
     } catch (err) {
       console.error('Upload failed:', err);
@@ -108,10 +110,7 @@ export default function PhotoUploadDrawer({
         <Pressable
           onPress={pickImages}
           className="items-center rounded-lg border-2 border-dashed border-muted-4 p-8">
-          {/* Replace this with your own image icon */}
           <ImagesIcon width={40} height={40} />
-          {/* <Text className="mt-2 text-lg font-semibold">Drag and drop</Text>
-          <Text className="text-muted-7">or browse for photos</Text> */}
 
           <View className="mt-4 rounded-md bg-black px-4 py-2">
             <Text className="text-white">Browse</Text>

@@ -67,15 +67,7 @@ export function App() {
       <QueryProvider>
         <AuthContext.Provider value={store}>
           <AuthLoader>
-            <Navigation
-            // linking={{
-            //   enabled: 'auto',
-            //   prefixes: [
-            //     // Change the scheme to match your app's scheme defined in app.json
-            //     'wayvee-app',
-            //   ],
-            // }}
-            />
+            <Navigation />
           </AuthLoader>
         </AuthContext.Provider>
       </QueryProvider>

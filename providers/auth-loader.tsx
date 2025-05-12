@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { useStore } from 'zustand';
 
 import { getUser } from '~/apis/auth';
 import { Container } from '~/components/Container';
 import { AuthContext } from '~/store/auth';
+import userStore from '~/store/user';
 const AuthLoader = ({ children }: { children: React.ReactNode }) => {
   const store = React.useContext(AuthContext);
   if (!store) throw new Error('Missing BearContext.Provider in the tree');
@@ -14,6 +15,13 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
     queryKey: ['user'],
     queryFn: getUser,
   });
+  const { setToken } = userStore();
+  useEffect(() => {
+    if (data?.user) {
+      logUser(data?.user as any);
+      setToken(data.token);
+    }
+  }, [data]);
 
   if (isLoading) {
     return (
@@ -22,9 +30,7 @@ const AuthLoader = ({ children }: { children: React.ReactNode }) => {
       </Container>
     );
   }
-  if (data?.data.data) {
-    logUser(data?.data.data);
-  }
+
   return <>{children}</>;
 };
 

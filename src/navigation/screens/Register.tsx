@@ -5,7 +5,14 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Text, Pressable, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+} from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import z from 'zod';
 
 import { RootStackParamList } from '../types';
@@ -68,7 +75,7 @@ const Register = () => {
     }
   };
   return (
-    <Container className="p-4">
+    <KeyboardAwareScrollView className="flex-1 p-4 pt-10">
       <Pressable
         onPress={() => {
           //   router.back();
@@ -77,7 +84,7 @@ const Register = () => {
         className="flex flex-row justify-between py-2">
         <Text className="font-urbanist text-primary-normal">back</Text>
       </Pressable>
-      <View className="gap-6">
+      <KeyboardAvoidingView className="gap-6">
         <View />
         <View className="flex">
           <Text className="font-urbanistBold text-[40px] text-primary-normal">
@@ -170,8 +177,8 @@ const Register = () => {
           onPress={handleSubmit(submit)}
           isLoading={isLoading}
         />
-      </View>
-    </Container>
+      </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 };
 

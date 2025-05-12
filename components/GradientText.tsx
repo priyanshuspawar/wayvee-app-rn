@@ -1,19 +1,23 @@
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Text } from 'react-native';
+import { DimensionValue, Text } from 'react-native';
 export function GradientText({
   text,
   className,
+  height,
+  width,
 }: {
   text: string;
   className: string;
+  height: DimensionValue | undefined;
+  width: DimensionValue | undefined;
 }) {
   return (
     <MaskedView
       style={{
         flex: 1,
-        width: '100%',
-        height: '100%',
+        height,
+        width,
       }}
       maskElement={<Text className={className}>{text}</Text>}>
       <LinearGradient

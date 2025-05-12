@@ -17,6 +17,7 @@ import GoogleIcon from '~/assets/google-icon.svg';
 import { Container } from '~/components/Container';
 import InputField from '~/components/ui/InputField';
 import { AuthContext } from '~/store/auth';
+import { save } from '~/store/secure';
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const Login = () => {
@@ -76,30 +77,45 @@ const Login = () => {
         onBackdropPress={() => {
           setModalVisible(false);
         }}>
-        <View className="flex-1 items-center justify-center">
-          <View className="flex h-fit w-[90vw] flex-col items-center  rounded-xl bg-neutral-n50 p-2">
-            <Text className="w-full text-center font-UrbanistMedium text-lg">
+        <View className="flex-1 items-center justify-center p-4">
+          <View className="flex h-fit w-[90vw] flex-col items-center gap-4  rounded-xl bg-neutral-n50 p-2">
+            <Text className="w-[80%] text-center font-UrbanistSemiBold text-xl">
               {getValues('email')} account does not exist
             </Text>
             <Pressable
               onPress={() => {
-                // router.navigate('/(auth)/register');
+                navigation.navigate('Register');
               }}>
-              <Text className="text-blue-500 underline">create one</Text>
+              <Text className="font-UrbanistMedium text-lg text-blue-500">
+                create one
+              </Text>
             </Pressable>
           </View>
         </View>
       </Modal>
-      <View className="mb-6 flex w-full items-end">
-        {/* <Text className="font-urbanist">skip</Text> */}
+      <View className="mb-6 flex w-full">
+        <Pressable
+          onPress={() => {
+            navigation.goBack();
+          }}>
+          <Text className="font-urbanist">back</Text>
+        </Pressable>
       </View>
       {/* contents */}
       <View className="flex w-full flex-1 gap-4">
         {/* screen title */}
         <View>
-          <Text className="font-urbanistBold text-5xl text-primary-normal">
-            Hello,
-          </Text>
+          <Pressable
+            onPress={async () => {
+              save(
+                'token',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5NzM5ODhhNy0wOWU4LTRhMzAtYjZiNS1lYTZiNjYwMzJiMTEifQ.u1Fg0n53DQPlx95wF0JLilzQyF2719yCNIDYQwFP5dg'
+              );
+            }}>
+            <Text className="font-urbanistBold text-5xl text-primary-normal">
+              Hello,
+            </Text>
+          </Pressable>
           <Text className="font-urbanistBold text-5xl text-secondary-normal">
             There
           </Text>
@@ -139,22 +155,26 @@ const Login = () => {
           </Pressable>
         </View>
         {/* divider */}
-        <View className="relative my-2 flex h-fit w-full flex-row items-center justify-between gap-2">
-          <View className="h-[0.5px] flex-grow bg-muted-7" />
-          <Text className="font-urbanist text-muted-7">or</Text>
-          <View className="h-[0.5px] flex-grow bg-muted-7" />
-        </View>
+        {false && (
+          <View className="relative my-2 flex h-fit w-full flex-row items-center justify-between gap-2">
+            <View className="h-[0.5px] flex-grow bg-muted-7" />
+            <Text className="font-urbanist text-muted-7">or</Text>
+            <View className="h-[0.5px] flex-grow bg-muted-7" />
+          </View>
+        )}
         {/* other oauth options */}
-        <View>
-          <Pressable className="relative flex w-full flex-row items-center justify-center rounded-xl border border-muted-10 p-3">
-            <View className="absolute left-2">
-              <GoogleIcon />
-            </View>
-            <Text className="font-UrbanistSemiBold text-lg">
-              Continue with google
-            </Text>
-          </Pressable>
-        </View>
+        {false && (
+          <View>
+            <Pressable className="relative flex w-full flex-row items-center justify-center rounded-xl border border-muted-10 p-3">
+              <View className="absolute left-2">
+                <GoogleIcon />
+              </View>
+              <Text className="font-UrbanistSemiBold text-lg">
+                Continue with google
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </Container>
   );
